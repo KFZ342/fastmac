@@ -1,30 +1,10 @@
 name: fastmac
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-permissions:
-  contents: write
 jobs:
-  shell:
+  macos-shell:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download and Start tmate
-        run: |
-          echo "Downloading tmate binary..."
-          curl -sL -o tmate.tar.gz https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-macOS.zip
-          unzip -o tmate.tar.gz > /dev/null
-          mv tmate-2.4.0-static-macOS/tmate /usr/local/bin/ || true
-          echo "Starting tmate..."
-          tmate -S /tmp/tmate.sock new-session -d
-          tmate -S /tmp/tmate.sock wait tmate-ready
-          tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}' > ssh.txt
-          tmate -S /tmp/tmate.sock display -p '#{tmate_web}' >> ssh.txt
-          echo "Pushing connection info..."
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git checkout -b tmate-info
-          git add ssh.txt
-          git commit -m "tmate info"
-          git push origin tmate-info --force
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
