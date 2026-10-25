@@ -8,21 +8,23 @@ permissions:
 jobs:
   shell:
     runs-on: macos-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Start tmate
+      - name: Download and Start tmate
         run: |
-          brew install tmate
+          echo "Downloading tmate binary..."
+          curl -sL -o tmate.tar.gz https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-macOS.zip
+          unzip -o tmate.tar.gz > /dev/null
+          mv tmate-2.4.0-static-macOS/tmate /usr/local/bin/ || true
+          echo "Starting tmate..."
           tmate -S /tmp/tmate.sock new-session -d
           tmate -S /tmp/tmate.sock wait tmate-ready
-          tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}' > /tmp/tmate_ssh.txt
-          tmate -S /tmp/tmate.sock display -p '#{tmate_web}' > /tmp/tmate_web.txt
+          tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}' > ssh.txt
+          tmate -S /tmp/tmate.sock display -p '#{tmate_web}' >> ssh.txt
+          echo "Pushing connection info..."
           git config user.name github-actions
           git config user.email github-actions@github.com
           git checkout -b tmate-info
-          cp /tmp/tmate_ssh.txt ./ssh.txt
-          cp /tmp/tmate_web.txt ./web.txt
-          git add ssh.txt web.txt
+          git add ssh.txt
           git commit -m "tmate info"
           git push origin tmate-info --force
