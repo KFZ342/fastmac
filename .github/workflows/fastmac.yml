@@ -1,10 +1,17 @@
-name: fastmac
+name: fastmac-native
+
 on:
   workflow_dispatch:
+
 jobs:
-  macos-shell:
+  shell:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      - name: Download tmate binary
+        run: |
+          curl -L -o tmate.tar.xz https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-macOS.tar.xz
+          tar -xf tmate.tar.xz
+      - name: Run tmate in foreground
+        run: |
+          ./tmate-2.4.0-static-macOS/tmate -F
